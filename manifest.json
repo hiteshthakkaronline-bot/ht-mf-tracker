@@ -1,0 +1,16 @@
+{
+  "name": "HT MF Tracker",
+  "short_name": "MF Tracker",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#130a1e",
+  "theme_color": "#130a1e",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
