@@ -1,6 +1,6 @@
 {
   "name": "HT MF TRACKER",
-  "short_name": "MF Tracker",
+  "short_name": "HT MF Tracker",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#130a1e",
