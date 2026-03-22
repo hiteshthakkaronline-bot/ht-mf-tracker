@@ -22,8 +22,9 @@
           notifyButton: {
             enable: true, 
           },
-          // 👇 THIS IS THE MAGIC FIX FOR GITHUB PAGES 👇
-          serviceWorkerPath: "OneSignalSDKWorker.js", 
+          // 👇 EXPLICIT GITHUB PAGES FOLDER SCOPE 👇
+          serviceWorkerParam: { scope: "/ht-mf-tracker/" },
+          serviceWorkerPath: "/ht-mf-tracker/OneSignalSDKWorker.js"
         });
       });
     </script>
