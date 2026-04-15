@@ -22,9 +22,9 @@
           safari_web_id: "web.onesignal.auto.380fb02b-8aa0-443a-a38d-87b1b457c3de",
           notifyButton: {
             enable: true, 
-            position: 'bottom-left', // 👇 NEW: Forces the bell to the left side
+            position: 'bottom-left', // Forces the bell to the left side
           },
-          // 👇 EXPLICIT GITHUB PAGES FOLDER SCOPE 👇
+          // EXPLICIT GITHUB PAGES FOLDER SCOPE
           serviceWorkerParam: { scope: "/ht-mf-tracker/" },
           serviceWorkerPath: "ht-mf-tracker/OneSignalSDKWorker.js"
         });
@@ -303,6 +303,48 @@
         }
       }
 
+      // 👇 NEW: Generic Automation Trigger Function
+      async function triggerAction(actionName, buttonId) {
+        const btn = document.getElementById(buttonId);
+        const originalHtml = btn.innerHTML;
+
+        try {
+          // Disable button and show loader
+          btn.disabled = true;
+          btn.innerHTML = `<div class="d-flex w-100 justify-content-center"><div class="spinner-border spinner-border-sm" role="status"></div></div>`;
+          
+          let loadingMsg = "Processing...";
+          if (actionName === "fetchCAS") loadingMsg = "📥 Fetching CAS from Gmail...";
+          if (actionName === "decryptCAS") loadingMsg = "🔓 Decrypting & Extracting CAS data...";
+          showToast(loadingMsg, false);
+
+          const response = await fetch(`${GAS_WEB_APP_URL}?action=${actionName}`);
+          if (!response.ok) throw new Error("Network error connecting to Apps Script");
+          
+          const result = await response.json();
+
+          // Restore button
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+          
+          if (result && result.success) {
+            showToast(`✅ Success: ${result.message || 'Action completed'}`, false); 
+            
+            // If decrypting changes portfolio numbers, reload the dashboard data automatically
+            if (actionName === "decryptCAS") {
+               setTimeout(() => { loadData(); }, 1500); 
+            }
+          } else {
+            showToast(`❌ Failed: ${result.message || "Unknown error"}`, true); 
+          }
+            
+        } catch (err) {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+          showToast(`⚠️ Connection Error: ${err.message}`, true);
+        }
+      }
+
       function toggleNumbers() {
         isNumbersHidden = !isNumbersHidden;
         document.getElementById('hide-icon').innerText = isNumbersHidden ? '🔒' : '👁️';
@@ -413,7 +455,7 @@
 
       document.addEventListener('DOMContentLoaded', () => { initTheme(); loadData(); });
 
-function renderDashboard() {
+      function renderDashboard() {
         const dash = document.getElementById('page-dashboard');
         
         const firstName = rawData.firstName || 'Investor';
@@ -436,7 +478,6 @@ function renderDashboard() {
           const dailyClass = day < 0 ? 'loss' : (day > 0 ? 'profit' : '');
           
           const lastUpdatedStr = rawData.lastUpdated || 'N/A';
-          // 👇 NEW: Extract CAS Timestamp from the backend payload
           const casUpdatedStr = rawData.casUpdated || 'Pending'; 
 
           const netStr = isNumbersHidden ? '₹ ••••••' : currencyFormatter.format(net);
@@ -468,10 +509,30 @@ function renderDashboard() {
             </div>`;
         };
 
+        // 👇 NEW: Inject Automation UI Card
+        const automationsHtml = `
+          <div class="dashboard-card mt-2" style="background: var(--card-bg); border-color: var(--border-color); flex: none; margin-bottom: 20px;">
+            <h4 class="mb-3 fw-bold" style="font-size: 1.1rem; color: var(--text-main);">⚙️ CAS Automation</h4>
+            
+            <div class="d-flex flex-column gap-2">
+              <button id="btn-fetch-cas" onclick="triggerAction('fetchCAS', 'btn-fetch-cas')" class="btn w-100 d-flex justify-content-between align-items-center" style="background: rgba(157, 78, 221, 0.1); color: var(--primary); border: 1px solid rgba(157, 78, 221, 0.3); border-radius: 10px; padding: 12px 16px;">
+                <span class="fw-semibold">1. Fetch Latest CAS PDF</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              </button>
+              
+              <button id="btn-decrypt-cas" onclick="triggerAction('decryptCAS', 'btn-decrypt-cas')" class="btn w-100 d-flex justify-content-between align-items-center" style="background: rgba(157, 78, 221, 0.1); color: var(--primary); border: 1px solid rgba(157, 78, 221, 0.3); border-radius: 10px; padding: 12px 16px;">
+                <span class="fw-semibold">2. Decrypt & Process CAS</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </button>
+            </div>
+          </div>
+        `;
+
         dash.innerHTML = greetingHtml + 
                          createCard('Portfolio', rawData.totals, 'all') + 
                          createCard('Gold', rawData.gold, 'gold', 'gold-card') + 
-                         createCard('Silver', rawData.silver, 'silver', 'silver-card');
+                         createCard('Silver', rawData.silver, 'silver', 'silver-card') +
+                         automationsHtml;
       }
 
       function renderHoldings(type) {
