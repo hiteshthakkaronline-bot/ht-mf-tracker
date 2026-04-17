@@ -194,19 +194,20 @@
       </div>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 px-3">
-      <div class="d-flex align-items-center gap-3">
-        <div onclick="openMenu()" class="theme-btn" id="menu-btn" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 px-3 gap-2">
+      
+      <div class="d-flex align-items-center gap-2" style="min-width: 0; flex: 1;">
+        <div onclick="openMenu()" class="theme-btn flex-shrink-0" id="menu-btn" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 0;">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-main);">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
         </div>
-        <h3 id="greeting-title" class="mb-0 fw-bold" style="font-size: 1.6rem; color: var(--text-main); letter-spacing: -0.5px;">Hello 👋</h3>
+        <h3 id="greeting-title" class="mb-0 fw-bold text-truncate" style="font-size: clamp(1.15rem, 4.5vw, 1.4rem); color: var(--text-main); letter-spacing: -0.5px; line-height: 1.2;">Hello 👋</h3>
       </div>
       
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 flex-shrink-0">
         <div onclick="toggleTheme()" class="theme-btn" id="theme-btn" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
           <span id="theme-icon" style="font-size: 1.1rem;">🌙</span>
         </div>
@@ -436,9 +437,9 @@
           rawData = data;
           document.getElementById('loading-state').style.display = 'none';
           
-          // Inject name directly into top header greeting
+          // Ensure the emoji and name stay glued together safely with an inline-block span
           const firstName = rawData.firstName || 'Investor';
-          document.getElementById('greeting-title').innerHTML = `Hello, ${firstName} 👋`;
+          document.getElementById('greeting-title').innerHTML = `Hello, ${firstName} <span style="display:inline-block;">👋</span>`;
 
           renderDashboard();
           if (document.getElementById('page-holdings').style.display === 'block') { renderHoldings(activeView); } 
@@ -531,7 +532,6 @@
             </div>`;
         };
 
-        // Render dashboard (Greeting removed as it now sits permanently in the top header)
         dash.innerHTML = createCard('Portfolio', rawData.totals, 'all') + 
                          createCard('Gold', rawData.gold, 'gold', 'gold-card') + 
                          createCard('Silver', rawData.silver, 'silver', 'silver-card');
