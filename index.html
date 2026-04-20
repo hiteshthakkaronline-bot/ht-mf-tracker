@@ -109,8 +109,10 @@
       .close-btn { background: none; border: none; color: var(--text-main); font-size: 1.8rem; cursor: pointer; line-height: 1; padding: 0; }
 
       #page-dashboard {
-        flex-direction: column; height: calc(100vh - 60px); height: calc(100dvh - 60px); 
-        gap: 12px; padding-bottom: 85px; 
+        flex-direction: column; 
+        min-height: calc(100vh - 60px); /* Replaced fixed height to allow expansion */
+        gap: 12px; 
+        padding-bottom: 120px; /* Increased to fix overlap with refresh/hide buttons */
       }
 
       .dashboard-card { 
@@ -153,13 +155,24 @@
       }
       .sort-select:focus { border-color: var(--primary); }
 
+      /* --- FLOATING RIGHT BUTTONS --- */
+      .floating-hide-btn {
+        position: fixed; right: 5vw; bottom: 25px;
+        background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);
+        width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1040;
+        font-size: 1.2rem; transition: transform 0.2s ease;
+      }
+      .floating-hide-btn:active { transform: scale(0.95); }
+
       .floating-back-btn, .floating-top-btn {
         position: fixed; right: 5vw; background: var(--primary); color: #FFFFFF; width: 50px; height: 50px;
         border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); display: none; align-items: center;
-        justify-content: center; cursor: pointer; z-index: 1050; transition: transform 0.2s ease, box-shadow 0.2s ease, bottom 0.3s ease;
+        justify-content: center; cursor: pointer; z-index: 1050; transition: transform 0.2s ease, bottom 0.3s ease;
       }
-      .floating-back-btn { bottom: 25px; } .floating-top-btn { bottom: 25px; }
+      /* Defaults overridden in JS based on page context to avoid overlaps */
       .floating-back-btn:active, .floating-top-btn:active { transform: scale(0.95); }
+
     </style>
   </head>
   <body>
@@ -195,7 +208,6 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center pt-3 pb-2 px-3 gap-2">
-      
       <div class="d-flex align-items-center gap-2" style="min-width: 0; flex: 1;">
         <div onclick="openMenu()" class="theme-btn flex-shrink-0" id="menu-btn" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 0;">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-main);">
@@ -211,9 +223,6 @@
         <div onclick="toggleTheme()" class="theme-btn" id="theme-btn" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
           <span id="theme-icon" style="font-size: 1.1rem;">🌙</span>
         </div>
-        <div onclick="toggleNumbers()" class="theme-btn" id="hide-btn" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-          <span id="hide-icon" style="font-size: 1.1rem;">🔒</span>
-        </div>
       </div>
     </div>
 
@@ -224,6 +233,10 @@
         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
       </svg>
     </button>
+
+    <div onclick="toggleNumbers()" class="floating-hide-btn" id="hide-btn">
+      <span id="hide-icon">🔒</span>
+    </div>
 
     <div id="floating-back-btn" class="floating-back-btn" onclick="switchPage('dashboard')">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -335,7 +348,6 @@
         const originalHtml = btn.innerHTML;
 
         try {
-          // Disable button and show loader
           btn.disabled = true;
           btn.innerHTML = `<div class="d-flex w-100 justify-content-center"><div class="spinner-border spinner-border-sm" role="status"></div></div>`;
           
@@ -349,7 +361,6 @@
           
           const result = await response.json();
 
-          // Restore button
           btn.disabled = false;
           btn.innerHTML = originalHtml;
           
@@ -404,10 +415,15 @@
         const backBtn = document.getElementById('floating-back-btn');
         const topBtn = document.getElementById('floating-top-btn');
         
+        // Dynamically stack the floating buttons on the right to avoid overlapping the new hide button
         if (page === 'holdings') {
-          backBtn.style.display = 'flex'; topBtn.style.bottom = '85px'; renderHoldings(type);
+          backBtn.style.display = 'flex'; 
+          backBtn.style.bottom = '85px'; 
+          topBtn.style.bottom = '145px'; 
+          renderHoldings(type);
         } else {
-          backBtn.style.display = 'none'; topBtn.style.bottom = '25px'; 
+          backBtn.style.display = 'none'; 
+          topBtn.style.bottom = '85px'; 
         }
         window.scrollTo(0, 0); 
       }
@@ -437,7 +453,7 @@
           rawData = data;
           document.getElementById('loading-state').style.display = 'none';
           
-          // Ensure the emoji and name stay glued together safely with an inline-block span
+          // Inject name safely to prevent breaking lines
           const firstName = rawData.firstName || 'Investor';
           document.getElementById('greeting-title').innerHTML = `Hello, ${firstName} <span style="display:inline-block;">👋</span>`;
 
