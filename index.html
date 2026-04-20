@@ -87,7 +87,7 @@
       .toast-success { border-left: 4px solid var(--success) !important; }
       .toast-error { border-left: 4px solid var(--danger) !important; }
 
-      /* --- SIDEBAR MENU --- */
+      /* --- SIDEBAR MENU (RIGHT SIDE) --- */
       .sidebar-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6);
         z-index: 2000; opacity: 0; visibility: hidden; transition: 0.3s ease; backdrop-filter: blur(2px);
@@ -95,11 +95,11 @@
       .sidebar-overlay.show { opacity: 1; visibility: visible; }
       
       .sidebar {
-        position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--bg-color);
-        z-index: 2010; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 20px rgba(0,0,0,0.3);
-        display: flex; flex-direction: column; border-right: 1px solid var(--border-color);
+        position: fixed; top: 0; right: -300px; width: 280px; height: 100vh; background: var(--bg-color);
+        z-index: 2010; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+        display: flex; flex-direction: column; border-left: 1px solid var(--border-color);
       }
-      .sidebar.open { left: 0; }
+      .sidebar.open { right: 0; }
       
       .sidebar-header {
         padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; 
@@ -110,9 +110,9 @@
 
       #page-dashboard {
         flex-direction: column; 
-        min-height: calc(100vh - 60px); /* Replaced fixed height to allow expansion */
+        min-height: calc(100vh - 60px); 
         gap: 12px; 
-        padding-bottom: 120px; /* Increased to fix overlap with refresh/hide buttons */
+        padding-bottom: 120px; 
       }
 
       .dashboard-card { 
@@ -156,14 +156,14 @@
       .sort-select:focus { border-color: var(--primary); }
 
       /* --- FLOATING RIGHT BUTTONS --- */
-      .floating-hide-btn {
+      .floating-menu-btn {
         position: fixed; right: 5vw; bottom: 25px;
         background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color);
         width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1040;
         font-size: 1.2rem; transition: transform 0.2s ease;
       }
-      .floating-hide-btn:active { transform: scale(0.95); }
+      .floating-menu-btn:active { transform: scale(0.95); }
 
       .floating-back-btn, .floating-top-btn {
         position: fixed; right: 5vw; background: var(--primary); color: #FFFFFF; width: 50px; height: 50px;
@@ -179,7 +179,7 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMenu()"></div>
     <div class="sidebar" id="sideMenu">
       <div class="sidebar-header">
-        <h5 class="mb-0 fw-bold" style="color: var(--text-main); font-size: 1.25rem;">Operation</h5>
+        <h5 class="mb-0 fw-bold" style="color: var(--text-main); font-size: 1.25rem;">Menu</h5>
         <button class="close-btn" onclick="closeMenu()">&times;</button>
       </div>
       <div class="sidebar-content">
@@ -209,19 +209,15 @@
 
     <div class="d-flex justify-content-between align-items-center pt-3 pb-2 px-3 gap-2">
       <div class="d-flex align-items-center gap-2" style="min-width: 0; flex: 1;">
-        <div onclick="openMenu()" class="theme-btn flex-shrink-0" id="menu-btn" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-main);">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
+        <div onclick="toggleTheme()" class="theme-btn flex-shrink-0" id="theme-btn" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+          <span id="theme-icon" style="font-size: 1.1rem;">🌙</span>
         </div>
         <h3 id="greeting-title" class="mb-0 fw-bold text-truncate" style="font-size: clamp(1.15rem, 4.5vw, 1.4rem); color: var(--text-main); letter-spacing: -0.5px; line-height: 1.2;">Hello 👋</h3>
       </div>
       
       <div class="d-flex gap-2 flex-shrink-0">
-        <div onclick="toggleTheme()" class="theme-btn" id="theme-btn" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-          <span id="theme-icon" style="font-size: 1.1rem;">🌙</span>
+        <div onclick="toggleNumbers()" class="theme-btn" id="hide-btn" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+          <span id="hide-icon" style="font-size: 1.1rem;">🔒</span>
         </div>
       </div>
     </div>
@@ -234,8 +230,12 @@
       </svg>
     </button>
 
-    <div onclick="toggleNumbers()" class="floating-hide-btn" id="hide-btn">
-      <span id="hide-icon">🔒</span>
+    <div onclick="openMenu()" class="floating-menu-btn" id="menu-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-main);">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
     </div>
 
     <div id="floating-back-btn" class="floating-back-btn" onclick="switchPage('dashboard')">
@@ -414,8 +414,9 @@
 
         const backBtn = document.getElementById('floating-back-btn');
         const topBtn = document.getElementById('floating-top-btn');
+        const menuBtn = document.getElementById('menu-btn');
         
-        // Dynamically stack the floating buttons on the right to avoid overlapping the new hide button
+        // Stack right-side floating buttons cleanly so they don't overlap the new hamburger location
         if (page === 'holdings') {
           backBtn.style.display = 'flex'; 
           backBtn.style.bottom = '85px'; 
