@@ -311,7 +311,7 @@
         setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
       }
 
-      async function triggerNavFetch() {
+async function triggerNavFetch() {
         try {
           const btn = document.getElementById('nav-btn');
           const originalHtml = btn.innerHTML;
@@ -319,7 +319,8 @@
           btn.disabled = true;
           btn.innerHTML = '<div class="spinner-border text-white" style="width: 1.3rem; height: 1.3rem;" role="status"></div>';
 
-          const response = await fetch(GAS_WEB_APP_URL + "?action=refreshNav");
+          // 👇 FIX: Added { redirect: "follow" }
+          const response = await fetch(GAS_WEB_APP_URL + "?action=refreshNav", { redirect: "follow" });
           if (!response.ok) throw new Error("Network error fetching data");
           
           const result = await response.json();
@@ -356,7 +357,8 @@
           if (actionName === "decryptCAS") loadingMsg = "🔓 Decrypting CAS data...";
           showToast(loadingMsg, false);
 
-          const response = await fetch(`${GAS_WEB_APP_URL}?action=${actionName}`);
+          // 👇 FIX: Added { redirect: "follow" }
+          const response = await fetch(`${GAS_WEB_APP_URL}?action=${actionName}`, { redirect: "follow" });
           if (!response.ok) throw new Error("Network error connecting to Apps Script");
           
           const result = await response.json();
